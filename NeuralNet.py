@@ -88,9 +88,9 @@ class NeuralNet:
 
     for epoch in range(self.epochs):
       # shuffle the patterns in x and y synchronously
-      indices = self.generator.permutation(len(x))
-      x_shuffled = x[indices]
-      y_shuffled = y[indices]
+      indices = self.generator.permutation(len(x_train))
+      x_shuffled = x_train[indices]
+      y_shuffled = y_train[indices]
       
       train_error = 0
 
@@ -110,20 +110,18 @@ class NeuralNet:
         self.update_weights()
 
       # Feed-forward all training patterns and calculate their prediction quadratic error
-      current_epoch_prediction = self.predict(x)
+      current_epoch_prediction = self.predict(x_train)
       train_error = 0
-      for i in range(len(x)):
-        train_error += np.sum((current_epoch_prediction[i] - y[i]) ** 2)
-      train_error /= len(x)
+      for i in range(len(x_train)):
+        train_error += np.sum((current_epoch_prediction[i] - y_train[i]) ** 2)
+      train_error /= len(x_train)
 
-      # FIXME: this is wrong
       # Feed-forward all validation patterns and calculate their prediction quadratic error
+      current_epoch_validation_prediction = self.predict(x_val)
       val_error = 0
-      val_size = int(len(x) * self.validation_split)
-      for i in range(val_size):
-        self.forward(x[i])
-        val_error += np.sum((self.xi[self.L - 1] - y[i]) ** 2)
-      val_error /= val_size
+      for i in range(len(x_val)):
+        val_error += np.sum((current_epoch_validation_prediction - y_val[i]) ** 2)
+      val_error /= len(x_val)
 
       # Optional: Print the evolution of the training and validation errors
       print(f"Epoch {epoch + 1}/{self.epochs}, Training Error: {train_error}, Validation Error: {val_error}")
