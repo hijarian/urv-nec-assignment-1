@@ -9,10 +9,12 @@ class NeuralNet:
     epochs (int): Number of epochs for training.
     learning_rate (float): Learning rate for weight updates.
     momentum (float): Momentum factor for weight updates.
-    activation_function (callable): Activation function to be used in the network.
+    activation_function (string): Activation function to be used in the network. Possible values: 'relu', 'linear'.
     validation_split (float): Fraction of data to be used for validation.
-    xi (list): List of numpy arrays representing the activations of each layer.
+
+    xi (list): List containing the output of each layer.
     w (list): List of numpy arrays representing the weights between layers.
+
   Methods:
     fit(x, y):
       Trains the neural network on the provided data.
@@ -48,15 +50,21 @@ class NeuralNet:
     self.validation_split = validation_split
 
     self.xi = []
-    for lay in range(self.L):
-      self.xi.append(np.zeros(layers[lay]))
+    for layer in range(self.L):
+      self.xi.append(np.zeros(layers[layer]))
 
+    # classical solution is to zero the values out, but it's kind of redundant
+    # as we are going to randomize them in the fit method anyway
     self.w = []
+    # placeholder for the zeroth layer
     self.w.append(np.zeros((1, 1)))
-    for lay in range(1, self.L):
-      self.w.append(np.zeros((layers[lay], layers[lay - 1])))
+    for layer in range(1, self.L):
+      self.w.append(np.zeros((layers[layer], layers[layer - 1])))
 
     self.generator = np.random.default_rng(random_seed)
+
+    # We collect the errors for each epoch in these arrays
+    # so we can plot them later
     self.train_errors = []
     self.validation_errors = []
 
@@ -72,8 +80,6 @@ class NeuralNet:
     val_size = int(len(x) * self.validation_split)
     x_train, x_val = x[val_size:], x[:val_size]
     y_train, y_val = y[val_size:], y[:val_size]
-
-    # TODO: actually use the split in the below code!
 
     # Initialize all weights and thresholds randomly
     for lay in range(1, self.L):
