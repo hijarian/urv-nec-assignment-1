@@ -69,7 +69,7 @@ class NeuralNet:
     self.validation_errors = []
 
   # Scale input and/or output patterns!
-  def fit(self, x, y):
+  def fit(self, x: np.ndarray, y: np.ndarray) -> None:
     # Validate dimensions of x and y
     if x.shape[0] != y.shape[0]:
       raise ValueError("The number of samples in x and y must be equal.")
