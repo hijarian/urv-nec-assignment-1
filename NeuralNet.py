@@ -122,8 +122,6 @@ class NeuralNet:
       x_shuffled = x_train[indices]
       y_shuffled = y_train[indices]
       
-      train_error = 0
-
       # then iterate over the x and y patterns
       for pattern_index in range(len(x_shuffled)):
         # Choose the pattern (xµ, zµ) of the shuffled training set
@@ -139,26 +137,29 @@ class NeuralNet:
         # Update the weights and thresholds
         self.update_weights()
 
-      # Feed-forward all training patterns and calculate their prediction quadratic error
-      current_epoch_prediction = self.predict(x_train)
-      train_error = 0
-      for i in range(len(x_train)):
-        train_error += np.sum((current_epoch_prediction[i] - y_train[i]) ** 2)
-      train_error /= len(x_train)
+      train_error = self.calculate_error(x_train, y_train)
+      self.training_errors.append(train_error)
 
-      # Feed-forward all validation patterns and calculate their prediction quadratic error
-      current_epoch_validation_prediction = self.predict(x_val)
-      val_error = 0
-      for i in range(len(x_val)):
-        val_error += np.sum((current_epoch_validation_prediction - y_val[i]) ** 2)
-      val_error /= len(x_val)
+      validation_error = self.calculate_error(x_val, y_val)
+      self.validation_errors.append(validation_error)
 
       # Optional: Print the evolution of the training and validation errors
-      print(f"Epoch {epoch + 1}/{self.epochs}, Training Error: {train_error}, Validation Error: {val_error}")
+      print(f"Epoch {epoch + 1}/{self.epochs}, Training Error: {train_error}, Validation Error: {validation_error}")
 
    # Training loop END
 
-  def predict(self, x):
+  # Calculate the error for a given set of patterns
+  # both x and y are full set of patterns, not a single one
+  def calculate_error(self, x, y):
+    error = 0
+    # Feed-forward all patterns and calculate their prediction quadratic error
+    for i in range(len(x)):
+      self.forward(x[i])
+      error += np.sum((self.xi[self.L - 1] - y[i]) ** 2)
+    return error / len(x)
+
+  # Predict the output for a given set of patterns
+  def predict(self, x: np.ndarray) -> np.ndarray:
     y = []
     for i in range(len(x)):
       self.forward(x[i])
@@ -173,6 +174,7 @@ the epochs of the system, so this information can be plotted.
   def loss_epochs(self):
     return np.array(self.train_errors), np.array(self.validation_errors)
 
+  # x is a single pattern not the whole training/validation set!
   def forward(self, x):
     self.xi[0] = x
     for lay in range(1, self.L):
