@@ -1,4 +1,5 @@
 import numpy as np
+from activation_functions import activation_functions
 
 class NeuralNet:
   """
@@ -41,14 +42,19 @@ class NeuralNet:
     update_weights():
       Placeholder method for updating weights.
   """
-  def __init__(self, layers, epochs, learning_rate, momentum, activation_function, validation_split, random_seed=None):
+  def __init__(self, layers, epochs, learning_rate, momentum, activation_function_name, validation_split, random_seed=None):
     self.L = len(layers)
     self.n = layers.copy()
     self.epochs = epochs
     self.learning_rate = learning_rate
     self.momentum = momentum
-    self.activation_function = activation_function
     self.validation_split = validation_split
+
+    self.activation_function_name = activation_function_name
+
+    [self.activation_function, self.activation_function_derivative] = activation_functions()[activation_function_name]
+    if (self.activation_function is None) or (self.activation_function_derivative is None):
+      raise ValueError(f"Unsupported activation function: {activation_function_name}")
 
     self.xi = []
     for layer in range(self.L):
@@ -176,16 +182,7 @@ the epochs of the system, so this information can be plotted.
     self.xi[0] = x
     for lay in range(1, self.L):
         z = np.dot(self.w[lay], self.xi[lay - 1]) + self.theta[lay]
-        if self.activation_function == 'relu':
-            self.xi[lay] = np.maximum(0, z)
-        elif self.activation_function == 'linear':
-            self.xi[lay] = z
-        elif self.activation_function == 'tanh':
-            self.xi[lay] = np.tanh(z)
-        elif self.activation_function == 'sigmoid':
-            self.xi[lay] = 1 / (1 + np.exp(-z))
-        else:
-            raise ValueError(f"Unsupported activation function: {self.activation_function}")
+        self.xi[lay] = self.activation_function(z)
 
   def backward(self, y):
     error = self.xi[self.L - 1] - y
@@ -193,20 +190,8 @@ the epochs of the system, so this information can be plotted.
     deltas[self.L - 1] = error
 
     for lay in range(self.L - 2, 0, -1):
-        if self.activation_function == 'relu':
-            delta = np.dot(self.w[lay + 1].T, deltas[lay + 1])
-            delta[self.xi[lay] <= 0] = 0
-            deltas[lay] = delta
-        elif self.activation_function == 'linear':
-            deltas[lay] = np.dot(self.w[lay + 1].T, deltas[lay + 1])
-        elif self.activation_function == 'tanh':
-            delta = np.dot(self.w[lay + 1].T, deltas[lay + 1])
-            deltas[lay] = delta * (1 - self.xi[lay] ** 2)
-        elif self.activation_function == 'sigmoid':
-            delta = np.dot(self.w[lay + 1].T, deltas[lay + 1])
-            deltas[lay] = delta * self.xi[lay] * (1 - self.xi[lay])
-        else:
-            raise ValueError(f"Unsupported activation function: {self.activation_function}")
+      next_layer_weighted_error = np.dot(self.w[lay + 1].T, deltas[lay + 1])
+      deltas[lay] = next_layer_weighted_error * self.activation_function_derivative(self.xi[lay])
 
     # Calculate gradients
     for lay in range(1, self.L):
