@@ -14,6 +14,7 @@ class NeuralNet:
 
     xi (list): List containing the output of each layer.
     w (list): List of numpy arrays representing the weights between layers.
+    theta (list): List of numpy arrays representing the thresholds (biases) for each layer.
 
   Methods:
     fit(x, y):
@@ -61,12 +62,34 @@ class NeuralNet:
     for layer in range(1, self.L):
       self.w.append(np.zeros((layers[layer], layers[layer - 1])))
 
+    self.theta = []
+    self.theta.append(np.zeros(1))
+    for layer in range(1, self.L):
+      self.theta.append(np.zeros(layers[layer]))
+
     self.generator = np.random.default_rng(random_seed)
 
     # We collect the errors for each epoch in these arrays
     # so we can plot them later
     self.train_errors = []
     self.validation_errors = []
+
+    # Initialize velocity terms for momentum
+    self.v = []
+    self.v.append(np.zeros((1, 1)))
+    for layer in range(1, self.L):
+      self.v.append(np.zeros((layers[layer], layers[layer - 1])))
+
+    # Initialize gradients
+    self.d_w = []
+    self.d_w.append(np.zeros((1, 1)))
+    for layer in range(1, self.L):
+      self.d_w.append(np.zeros((layers[layer], layers[layer - 1])))
+
+    self.d_theta = []
+    self.d_theta.append(np.zeros(1))
+    for layer in range(1, self.L):
+      self.d_theta.append(np.zeros(layers[layer]))
 
   # Scale input and/or output patterns!
   def fit(self, x: np.ndarray, y: np.ndarray) -> None:
@@ -83,7 +106,8 @@ class NeuralNet:
 
     # Initialize all weights and thresholds randomly
     for lay in range(1, self.L):
-      self.w[lay] = self.generator.standard_normal(self.n[lay], self.n[lay - 1])
+      self.w[lay] = self.generator.standard_normal((self.n[lay], self.n[lay - 1]))
+      self.theta[lay] = self.generator.standard_normal(self.n[lay])
 
     # Training loop BEGIN
 
@@ -132,7 +156,7 @@ class NeuralNet:
       # Optional: Print the evolution of the training and validation errors
       print(f"Epoch {epoch + 1}/{self.epochs}, Training Error: {train_error}, Validation Error: {val_error}")
 
-
+   # Training loop END
 
   def predict(self, x):
     y = []
@@ -147,12 +171,12 @@ contain the evolution of the training error and the validation error for each of
 the epochs of the system, so this information can be plotted.
   """
   def loss_epochs(self):
-    return np.array(self.train_errors), np.array(self.val_errors)
+    return np.array(self.train_errors), np.array(self.validation_errors)
 
   def forward(self, x):
     self.xi[0] = x
     for lay in range(1, self.L):
-        z = np.dot(self.w[lay], self.xi[lay - 1])
+        z = np.dot(self.w[lay], self.xi[lay - 1]) + self.theta[lay]
         if self.activation_function == 'relu':
             self.xi[lay] = np.maximum(0, z)
         elif self.activation_function == 'linear':
@@ -170,7 +194,17 @@ the epochs of the system, so this information can be plotted.
             delta[self.xi[lay] <= 0] = 0
             deltas[lay] = delta
         # Add other activation functions as needed
-  
+
+    # Calculate gradients
+    for lay in range(1, self.L):
+      self.d_w[lay] = np.outer(deltas[lay], self.xi[lay - 1])
+      self.d_theta[lay] = deltas[lay]
+
   def update_weights(self):
     for lay in range(1, self.L):
-      self.w[lay] -= self.learning_rate * self.dW[lay]
+      # Update velocity
+      self.v[lay] = self.momentum * self.v[lay] - self.learning_rate * self.d_w[lay]
+      # Update weights
+      self.w[lay] += self.v[lay]
+      # Update thresholds
+      self.theta[lay] -= self.learning_rate * self.d_theta[lay]
