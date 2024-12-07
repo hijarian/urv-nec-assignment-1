@@ -150,13 +150,10 @@ class NeuralNet:
 
   # Calculate the error for a given set of patterns
   # both x and y are full set of patterns, not a single one
-  def calculate_error(self, x, y):
-    error = 0
-    # Feed-forward all patterns and calculate their prediction quadratic error
-    for i in range(len(x)):
-      self.forward(x[i])
-      error += np.sum((self.xi[self.L - 1] - y[i]) ** 2)
-    return error / len(x)
+  def calculate_error(self, x: np.ndarray, y: np.ndarray) -> float:
+    predictions = self.predict(x)
+    error = np.sum((predictions - y) ** 2) / len(x)
+    return error
 
   # Predict the output for a given set of patterns
   def predict(self, x: np.ndarray) -> np.ndarray:
