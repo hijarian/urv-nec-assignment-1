@@ -9,7 +9,7 @@ class NeuralNet:
     epochs (int): Number of epochs for training.
     learning_rate (float): Learning rate for weight updates.
     momentum (float): Momentum factor for weight updates.
-    activation_function (string): Activation function to be used in the network. Possible values: 'relu', 'linear'.
+    activation_function (string): Activation function to be used in the network. Possible values: 'relu', 'linear', 'tanh', 'sigmoid'.
     validation_split (float): Fraction of data to be used for validation.
 
     xi (list): List containing the output of each layer.
@@ -161,7 +161,7 @@ class NeuralNet:
     for i in range(len(x)):
       self.forward(x[i])
       y.append(self.xi[self.L - 1])
-    return y
+    return np.array(y)
   
   """
   returns 2 arrays of size (n_epochs, 2) that
@@ -180,7 +180,12 @@ the epochs of the system, so this information can be plotted.
             self.xi[lay] = np.maximum(0, z)
         elif self.activation_function == 'linear':
             self.xi[lay] = z
-        # todo: Add other activation functions as needed
+        elif self.activation_function == 'tanh':
+            self.xi[lay] = np.tanh(z)
+        elif self.activation_function == 'sigmoid':
+            self.xi[lay] = 1 / (1 + np.exp(-z))
+        else:
+            raise ValueError(f"Unsupported activation function: {self.activation_function}")
 
   def backward(self, y):
     error = self.xi[self.L - 1] - y
@@ -192,7 +197,16 @@ the epochs of the system, so this information can be plotted.
             delta = np.dot(self.w[lay + 1].T, deltas[lay + 1])
             delta[self.xi[lay] <= 0] = 0
             deltas[lay] = delta
-        # Add other activation functions as needed
+        elif self.activation_function == 'linear':
+            deltas[lay] = np.dot(self.w[lay + 1].T, deltas[lay + 1])
+        elif self.activation_function == 'tanh':
+            delta = np.dot(self.w[lay + 1].T, deltas[lay + 1])
+            deltas[lay] = delta * (1 - self.xi[lay] ** 2)
+        elif self.activation_function == 'sigmoid':
+            delta = np.dot(self.w[lay + 1].T, deltas[lay + 1])
+            deltas[lay] = delta * self.xi[lay] * (1 - self.xi[lay])
+        else:
+            raise ValueError(f"Unsupported activation function: {self.activation_function}")
 
     # Calculate gradients
     for lay in range(1, self.L):
