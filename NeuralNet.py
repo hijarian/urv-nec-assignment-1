@@ -166,7 +166,7 @@ class NeuralNet:
     y = []
     for i in range(len(x)):
       self.forward(x[i])
-      y.append(self.xi[self.L - 1])
+      y.append(self.xi[-1])
     return np.array(y)
   
   """
@@ -185,9 +185,9 @@ the epochs of the system, so this information can be plotted.
         self.xi[lay] = self.activation_function(z)
 
   def backward(self, y):
-    error = self.xi[self.L - 1] - y
+    error = self.xi[-1] - y
     deltas = [None] * self.L
-    deltas[self.L - 1] = error
+    deltas[-1] = error
 
     for lay in range(self.L - 2, 0, -1):
       next_layer_weighted_error = np.dot(self.w[lay + 1].T, deltas[lay + 1])
