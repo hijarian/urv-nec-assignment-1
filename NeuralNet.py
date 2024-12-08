@@ -42,7 +42,7 @@ class NeuralNet:
     update_weights():
       Placeholder method for updating weights.
   """
-  def __init__(self, *, layers, epochs=100, learning_rate=1.1, momentum=0.9, activation_function_name='sigmoid', validation_split=0.2, random_seed=None):
+  def __init__(self, *, layers, epochs=100, learning_rate=1.1, momentum=0.9, activation_function_name='sigmoid', validation_split=0.2, random_seed=None, visualize=True):
     self.L = len(layers)
     self.n = layers.copy()
     self.epochs = epochs
@@ -150,7 +150,8 @@ class NeuralNet:
       self.validation_errors.append(validation_error)
 
       # Optional: Print the evolution of the training and validation errors
-      print(f"Epoch {epoch + 1}/{self.epochs}, Training Error: {train_error}, Validation Error: {validation_error}")
+      if self.visualize:
+        print(f"Epoch {epoch + 1}/{self.epochs}, Training Error: {train_error}, Validation Error: {validation_error}")
 
    # Training loop END
 
