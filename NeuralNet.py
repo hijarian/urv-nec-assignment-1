@@ -42,7 +42,7 @@ class NeuralNet:
     update_weights():
       Placeholder method for updating weights.
   """
-  def __init__(self, *, layers, epochs=100, learning_rate=0.01, momentum=0.9, activation_function_name='sigmoid', validation_split=0.2, random_seed=None):
+  def __init__(self, *, layers, epochs=100, learning_rate=1.1, momentum=0.9, activation_function_name='sigmoid', validation_split=0.2, random_seed=None):
     self.L = len(layers)
     self.n = layers.copy()
     self.epochs = epochs
