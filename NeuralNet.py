@@ -49,6 +49,7 @@ class NeuralNet:
     self.learning_rate = learning_rate
     self.momentum = momentum
     self.validation_split = validation_split
+    self.visualize = visualize
 
     self.activation_function_name = activation_function_name
 
