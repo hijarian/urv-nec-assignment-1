@@ -195,14 +195,13 @@ the epochs of the system, so this information can be plotted.
 
     # Calculate gradients
     for lay in range(1, self.L):
-      self.d_w[lay] = np.outer(deltas[lay], self.xi[lay - 1])
-      self.d_theta[lay] = deltas[lay]
+      # see BP.v2.pdf page 4
+      self.d_w[lay]     = self.momentum * self.d_w[lay] - self.learning_rate * np.outer(deltas[lay], self.xi[lay - 1])
+      self.d_theta[lay] = self.momentum * self.d_theta[lay] + self.learning_rate * deltas[lay]
 
   def update_weights(self):
     for lay in range(1, self.L):
-      # Update velocity
-      self.v[lay] = self.momentum * self.v[lay] - self.learning_rate * self.d_w[lay]
       # Update weights
-      self.w[lay] += self.v[lay]
+      self.w[lay] += self.d_w[lay]
       # Update thresholds
-      self.theta[lay] -= self.learning_rate * self.d_theta[lay]
+      self.theta[lay] += self.d_theta[lay]
