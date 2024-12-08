@@ -77,7 +77,7 @@ class NeuralNet:
 
     # We collect the errors for each epoch in these arrays
     # so we can plot them later
-    self.train_errors = []
+    self.training_errors = []
     self.validation_errors = []
 
     # Initialize velocity terms for momentum
@@ -119,7 +119,7 @@ class NeuralNet:
 
     # reset the training and validation errors arrays cache as we are training again
     # these are stored in the instance so we can access them later by calling self.loss_epochs()
-    self.train_errors = []
+    self.training_errors = []
     self.validation_errors = []
 
     for epoch in range(self.epochs):
@@ -175,7 +175,7 @@ contain the evolution of the training error and the validation error for each of
 the epochs of the system, so this information can be plotted.
   """
   def loss_epochs(self):
-    return np.array(self.train_errors), np.array(self.validation_errors)
+    return np.array(self.training_errors), np.array(self.validation_errors)
 
   # x is a single pattern not the whole training/validation set!
   def forward(self, x):
