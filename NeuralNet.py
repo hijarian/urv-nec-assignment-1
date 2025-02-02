@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from activation_functions import activation_functions
 
 class NeuralNet:
@@ -125,6 +126,42 @@ class NeuralNet:
     self.training_errors = []
     self.validation_errors = []
 
+    if self.visualize:
+      plt.ion()
+      figure, axs = plt.subplots(5, self.L)
+      images_weight = [None] * self.L
+      plots_theta = [None] * self.L
+      images_delta_weights = [None] * self.L
+      plots_delta_thetas = [None] * self.L
+      for layer in range(1, self.L):
+        column = layer - 1
+        axs[0, column].clear()
+        images_weight[layer] = axs[0, column].matshow(self.w[layer], cmap='hot', interpolation='nearest')
+        axs[0, column].set_title(f'Layer {layer} weights')
+        axs[0, column].axis('off')
+        figure.colorbar(images_weight[layer], ax=axs[0, column])
+
+        axs[1, column].clear()
+        plots_theta[layer] = axs[1, column].plot(self.theta[layer])
+        axs[1, column].set_title(f'Layer {layer} theta')
+
+        axs[2, column].clear()
+        images_delta_weights[layer] = axs[2, column].matshow(self.d_w[layer], cmap='hot', interpolation='nearest')
+        axs[2, column].set_title(f'Layer {layer} weights diff')
+        axs[2, column].axis('off')
+        figure.colorbar(images_delta_weights[layer], ax=axs[2, column])
+
+        axs[3, column].clear()
+        plots_delta_thetas[layer] = axs[3, column].plot(self.d_theta[layer])
+        axs[3, column].set_title(f'Layer {layer} theta diff')
+
+      axs[4, 0].set_title('Training Error')
+      axs[4, 1].set_title('Validation Error')
+
+      plt.show(block=False)
+      figure.canvas.draw_idle()
+      figure.canvas.flush_events()
+
     for epoch in range(self.epochs):
       # shuffle the patterns in x and y synchronously
       indices = self.generator.permutation(len(x_train))
@@ -146,6 +183,35 @@ class NeuralNet:
         # Update the weights and thresholds
         self.update_weights()
 
+        if self.visualize and pattern_index % self.visualize == 0:
+          for layer in range(1, self.L):
+            column = layer - 1;
+            # set array simply silently does not do anything
+            # images_weight[layer].set_array(self.w[layer])
+
+            # so I recreate the image every time
+            axs[0, column].clear()
+            images_weight[layer] = axs[0, column].matshow(self.w[layer], cmap='hot', interpolation='nearest')
+            axs[0, column].axis('off')
+
+            axs[1, column].clear()
+            axs[1, column].plot(self.theta[layer])
+
+            # set array simply silently does not do anything
+            # images_delta_weights[layer].set_array(self.d_w[layer])
+
+            # so I recreate the image every time
+            axs[2, column].clear()
+            images_delta_weights[column] = axs[2, column].matshow(self.d_w[layer], cmap='hot', interpolation='nearest')
+            axs[2, column].axis('off')
+
+            axs[3, column].clear()
+            axs[3, column].plot(self.d_theta[layer])
+
+          # plt.show(block=False)
+          figure.canvas.draw_idle()
+          figure.canvas.flush_events()
+
       train_error = self.calculate_error(x_train, y_train)
       self.training_errors.append(train_error)
 
@@ -154,7 +220,36 @@ class NeuralNet:
 
       # Optional: Print the evolution of the training and validation errors
       if self.visualize:
+        for layer in range(1, self.L):
+          column = layer - 1
+          # set array simply silently does not do anything
+          # images_weight[layer].set_array(self.w[layer])
+
+          # so I recreate the image every time
+          axs[0, column].clear()
+          images_weight[layer] = axs[0, column].matshow(self.w[layer], cmap='hot', interpolation='nearest')
+          axs[0, column].axis('off')
+
+          axs[1, column].clear()
+          axs[1, column].plot(self.theta[layer])
+
+          # set array simply silently does not do anything
+          # images_delta_weights[layer].set_array(self.d_w[layer])
+
+          # so I recreate the image every time
+          axs[2, column].clear()
+          images_delta_weights[layer] = axs[2, column].matshow(self.d_w[layer], cmap='hot', interpolation='nearest')
+          axs[2, column].axis('off')
+
+          axs[3, column].clear()
+          axs[3, column].plot(self.d_theta[layer])
+          
         print(f"Epoch {epoch + 1}/{self.epochs}, Training Error: {train_error}, Validation Error: {validation_error}")
+        axs[4, 0].plot(self.training_errors, label='Training Error')
+        axs[4, 1].plot(self.validation_errors, label='Validation Error')
+        # plt.show(block=False)
+        figure.canvas.draw_idle()
+        figure.canvas.flush_events()
 
    # Training loop END
 
