@@ -113,8 +113,10 @@ class NeuralNet:
 
     # Initialize all weights and thresholds randomly
     for lay in range(1, self.L):
-      self.w[lay] = self.generator.standard_normal((self.n[lay], self.n[lay - 1]))
-      self.theta[lay] = self.generator.standard_normal(self.n[lay])
+      prev_layer_size = self.n[lay - 1]
+      # poor man's Xavier initialization
+      self.w[lay] = self.generator.normal(0, 1 / prev_layer_size, size=(self.n[lay], self.n[lay - 1]))
+      self.theta[lay] = np.zeros(self.n[lay])
 
     # Training loop BEGIN
 
