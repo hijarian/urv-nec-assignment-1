@@ -217,6 +217,8 @@ class NeuralNet:
 
       validation_error = self.calculate_error(x_val, y_val)
       self.validation_errors.append(validation_error)
+      
+      print(f"Epoch {epoch + 1}/{self.epochs}, Training Error: {train_error}, Validation Error: {validation_error}")
 
       # Optional: Print the evolution of the training and validation errors
       if self.visualize:
@@ -244,7 +246,6 @@ class NeuralNet:
           axs[3, column].clear()
           axs[3, column].plot(self.d_theta[layer])
           
-        print(f"Epoch {epoch + 1}/{self.epochs}, Training Error: {train_error}, Validation Error: {validation_error}")
         axs[4, 0].plot(self.training_errors, label='Training Error')
         axs[4, 1].plot(self.validation_errors, label='Validation Error')
         # plt.show(block=False)
