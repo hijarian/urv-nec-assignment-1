@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error, mean_absolute_error, mean_absolute_percentage_error
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 
 scaler = StandardScaler()
 
@@ -34,7 +35,14 @@ def main():
     input_layer = X_train.shape[1]
     layers = [input_layer, 27, 17, 1]
 
-    nn = NeuralNet(layers=layers, epochs=3, learning_rate=0.001, momentum=0.06, activation_function_name='linear', validation_split=0.2, visualize=100)
+    nn = NeuralNet(layers=layers,
+                    epochs=30,
+                      learning_rate=0.001,
+                        momentum=0.06, 
+                        activation_function_name='linear', 
+                        validation_split=0.2
+                    , visualize=None
+                   )
     nn.fit(X_train, y_train)
 
     y_pred = nn.predict(X_test)
@@ -51,6 +59,14 @@ def main():
     print(f"Mean Squared Error: {mse}")
     print(f"Mean Absolute Error: {mae}")
     print(f"Mean Absolute Percentage Error: {mape}%")
+
+    plt.plot(nn.training_errors, label='Training Error')
+    plt.plot(nn.validation_errors, label='Validation Error')
+    plt.xlabel('Epochs')
+    plt.ylabel('Error')
+    plt.title('Training and Validation Error over Epochs')
+    plt.legend()
+    plt.show()
 
 if __name__ == '__main__':
     main()
