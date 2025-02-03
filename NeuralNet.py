@@ -280,13 +280,13 @@ the epochs of the system, so this information can be plotted.
   def forward(self, x):
     self.xi[0] = x
     for lay in range(1, self.L):
-        z = np.dot(self.w[lay], self.xi[lay - 1]) + self.theta[lay]
+        z = np.dot(self.w[lay], self.xi[lay - 1]) - self.theta[lay]
         self.xi[lay] = self.activation_function(z)
 
   def backward(self, y):
     error = self.xi[-1] - y
     deltas = [None] * self.L
-    deltas[-1] = error
+    deltas[-1] = self.activation_function_derivative(self.xi[-1]) * error
 
     for lay in range(self.L - 2, 0, -1):
       next_layer_weighted_error = np.dot(self.w[lay + 1].T, deltas[lay + 1])
