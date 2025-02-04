@@ -60,12 +60,23 @@ def main():
     print(f"Mean Absolute Error: {mae}")
     print(f"Mean Absolute Percentage Error: {mape}%")
 
-    plt.plot(nn.training_errors, label='Training Error')
-    plt.plot(nn.validation_errors, label='Validation Error')
-    plt.xlabel('Epochs')
-    plt.ylabel('Error')
-    plt.title('Training and Validation Error over Epochs')
-    plt.legend()
+    fig, axs = plt.subplots(1, 2, figsize=(14, 5))
+
+    # Plot training and validation error
+    axs[0].plot(nn.training_errors, label='Training Error')
+    axs[0].plot(nn.validation_errors, label='Validation Error')
+    axs[0].set_xlabel('Epochs')
+    axs[0].set_ylabel('Error')
+    axs[0].set_title('Training and Validation Error over Epochs')
+    axs[0].legend()
+
+    # Plot actual vs predicted revenue
+    axs[1].scatter(y_test, y_pred, alpha=0.5)
+    axs[1].set_xlabel('Actual Revenue')
+    axs[1].set_ylabel('Predicted Revenue')
+    axs[1].set_title('Actual vs Predicted Revenue')
+
+    plt.tight_layout()
     plt.show()
 
 if __name__ == '__main__':
